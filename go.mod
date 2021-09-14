@@ -1,4 +1,4 @@
-module github.com/hashicorp/terraform-provider-zeflix
+module github.com/kfrapin/terraform-provider-zeflix
 
 go 1.15
 
