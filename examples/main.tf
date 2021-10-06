@@ -1,5 +1,5 @@
 data "zeflix_catalog" "my_catalog" {
-    id = "12517246-293a-44c5-860d-7b658b2818cf"
+    id = "d0416022-a424-4cc1-9ecd-5700b5321df5"
 }
 
 output "my_catalog" {
