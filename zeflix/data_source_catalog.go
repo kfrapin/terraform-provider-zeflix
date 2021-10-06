@@ -15,14 +15,13 @@ func datasourceCatalog() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: datasourceCatalogRead,
 		Schema: map[string]*schema.Schema{
-			"name": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-			},
 			"id": {
 				Type:     schema.TypeString,
-				Optional: false,
+				Required: true,
+			},
+			"name": {
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 		},
 	}
@@ -43,17 +42,17 @@ func datasourceCatalogRead(ctx context.Context, d *schema.ResourceData, m interf
 	}
 	defer r.Body.Close()
 
-	catalog := make(map[string]interface{}, 0)
+	catalog := make(map[string]interface{})
 	err = json.NewDecoder(r.Body).Decode(&catalog)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	if err := d.Set("name", catalog["name"]); err != nil {
+	if err := d.Set("name", catalog["Name"]); err != nil {
 		return diag.FromErr(err)
 	}
 
-	d.SetId(id)
+	d.SetId(catalog["Id"].(string))
 
 	return diags
 }
