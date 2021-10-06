@@ -98,13 +98,53 @@ func resourceCatalogRead(ctx context.Context, d *schema.ResourceData, m interfac
 }
 
 func resourceCatalogUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	// not implemented yet
-	var diags diag.Diagnostics
-	return diags
+	client := &http.Client{Timeout: 10 * time.Second}
+
+	// update if name has changed
+	if d.HasChange("name") {
+		// prepare request body
+		catalog := make(map[string]interface{})
+		catalog["name"] = d.Get("name").(string)
+		b := new(bytes.Buffer)
+		json.NewEncoder(b).Encode(&catalog)
+	
+		// update catalog
+		req, err := http.NewRequest("PATCH", fmt.Sprintf("%s/catalog/%s", "http://localhost:8080", d.Id()), b)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		r, err := client.Do(req)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		defer r.Body.Close()
+	}
+
+	// populate terraform state after creation
+	return resourceCatalogRead(ctx, d, m)
 }
 
 func resourceCatalogDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	// not implemented yet
+	client := &http.Client{Timeout: 10 * time.Second}
 	var diags diag.Diagnostics
+
+	// use already defined id to retrieve catalog
+	id := d.Id()
+	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/catalog/%s", "http://localhost:8080", id), nil)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	// delete catalog request
+	r, err := client.Do(req)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	defer r.Body.Close()
+
+	// set catalog id to nil for the state
+	d.SetId("")
+	
+
 	return diags
 }
