@@ -2,6 +2,7 @@ package zeflix
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"time"
@@ -10,51 +11,49 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-
-func datasourceCatalogRead() *schema.Resource {
-	return &schema.Resource {
-		ReadContext: resourceCatalogRead,
+func datasourceCatalog() *schema.Resource {
+	return &schema.Resource{
+		ReadContext: datasourceCatalogRead,
 		Schema: map[string]*schema.Schema{
 			"name": {
-				Type: schema.TypeString,
+				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 			},
 			"id": {
-				Type: schema.TypeString,
+				Type:     schema.TypeString,
 				Optional: false,
 			},
 		},
 	}
 }
 
-func resourceCatalogRead(ctx context.Context, d *schema.ResourceData, m interface{})  diag.Diagnostics {
+func datasourceCatalogRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := &http.Client{Timeout: 10 * time.Second}
 	var diags diag.Diagnostics
-	id := d.Get("id")
+	id := d.Get("id").(string)
 	req, err := http.NewRequest("GET", fmt.Sprintf("%s/catalog/%s", "http://localhost:8080", id), nil)
-  if err != nil {
-    return diag.FromErr(err)
-  }
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
-  r, err := client.Do(req)
-  if err != nil {
-    return diag.FromErr(err)
-  }
-  defer r.Body.Close()
+	r, err := client.Do(req)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	defer r.Body.Close()
 
-  coffees := make([]map[string]interface{}, 0)
-  err = json.NewDecoder(r.Body).Decode(&coffees)
-  if err != nil {
-    return diag.FromErr(err)
-  }
+	catalog := make(map[string]interface{}, 0)
+	err = json.NewDecoder(r.Body).Decode(&catalog)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
-  if err := d.Set("coffees", coffees); err != nil {
-    return diag.FromErr(err)
-  }
+	if err := d.Set("name", catalog["name"]); err != nil {
+		return diag.FromErr(err)
+	}
 
-  // always run
-  d.SetId(strconv.FormatInt(time.Now().Unix(), 10))
+	d.SetId(id)
 
-  return diags
+	return diags
 }
