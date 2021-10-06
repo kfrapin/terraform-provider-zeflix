@@ -8,5 +8,5 @@ terraform {
 }
 
 provider "zeflix" {
-    // no configuration required
+  // no configuration required
 }

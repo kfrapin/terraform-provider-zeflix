@@ -8,7 +8,7 @@ func Provider() func() *schema.Provider {
 	return func() *schema.Provider {
 		p := &schema.Provider{
 			ResourcesMap: map[string]*schema.Resource{
-				// no resources yet
+				"zeflix_catalog": ressourceCatalog(),
 			},
 			DataSourcesMap: map[string]*schema.Resource{
 				"zeflix_catalog": datasourceCatalog(),
