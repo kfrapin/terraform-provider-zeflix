@@ -8,5 +8,6 @@ terraform {
 }
 
 provider "zeflix" {
-  // no configuration required
+  api_endpoint = "http://localhost:8080"
+  api_token = "MySecureToken"
 }

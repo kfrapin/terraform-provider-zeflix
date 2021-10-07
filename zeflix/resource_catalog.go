@@ -33,6 +33,12 @@ func ressourceCatalog() *schema.Resource {
 
 func resourceCatalogCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := &http.Client{Timeout: 10 * time.Second}
+
+	// get provider configuration (host, token)
+	provider := m.(map[string]string)
+	endpoint := provider["api_endpoint"]
+	token := provider["api_token"]
+
 	var diags diag.Diagnostics
 
 	// create json body
@@ -42,7 +48,8 @@ func resourceCatalogCreate(ctx context.Context, d *schema.ResourceData, m interf
 	json.NewEncoder(b).Encode(&catalog)
 
 	// create catalog
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/catalog", "http://localhost:8080"), b)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/catalog", endpoint), b)
+	req.Header.Add("X-Session-Token", token)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -70,9 +77,15 @@ func resourceCatalogRead(ctx context.Context, d *schema.ResourceData, m interfac
 	client := &http.Client{Timeout: 10 * time.Second}
 	var diags diag.Diagnostics
 
+	// get provider configuration (host, token)
+	provider := m.(map[string]string)
+	endpoint := provider["api_endpoint"]
+	token := provider["api_token"]
+
 	// use already defined id to retrieve catalog
 	id := d.Id()
-	req, err := http.NewRequest("GET", fmt.Sprintf("%s/catalog/%s", "http://localhost:8080", id), nil)
+	req, err := http.NewRequest("GET", fmt.Sprintf("%s/catalog/%s", endpoint, id), nil)
+	req.Header.Add("X-Session-Token", token)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -102,14 +115,20 @@ func resourceCatalogUpdate(ctx context.Context, d *schema.ResourceData, m interf
 
 	// update if name has changed
 	if d.HasChange("name") {
+		// get provider configuration (host, token)
+		provider := m.(map[string]string)
+		endpoint := provider["api_endpoint"]
+		token := provider["api_token"]
+
 		// prepare request body
 		catalog := make(map[string]interface{})
 		catalog["name"] = d.Get("name").(string)
 		b := new(bytes.Buffer)
 		json.NewEncoder(b).Encode(&catalog)
-	
+
 		// update catalog
-		req, err := http.NewRequest("PATCH", fmt.Sprintf("%s/catalog/%s", "http://localhost:8080", d.Id()), b)
+		req, err := http.NewRequest("PATCH", fmt.Sprintf("%s/catalog/%s", endpoint, d.Id()), b)
+		req.Header.Add("X-Session-Token", token)
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -128,9 +147,15 @@ func resourceCatalogDelete(ctx context.Context, d *schema.ResourceData, m interf
 	client := &http.Client{Timeout: 10 * time.Second}
 	var diags diag.Diagnostics
 
+	// get provider configuration (host, token)
+	provider := m.(map[string]string)
+	endpoint := provider["api_endpoint"]
+	token := provider["api_token"]
+
 	// use already defined id to retrieve catalog
 	id := d.Id()
-	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/catalog/%s", "http://localhost:8080", id), nil)
+	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/catalog/%s", endpoint, id), nil)
+	req.Header.Add("X-Session-Token", token)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -144,7 +169,6 @@ func resourceCatalogDelete(ctx context.Context, d *schema.ResourceData, m interf
 
 	// set catalog id to nil for the state
 	d.SetId("")
-	
 
 	return diags
 }
