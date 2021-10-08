@@ -11,9 +11,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func datasourceCatalog() *schema.Resource {
+func datasourceMovie() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: datasourceCatalogRead,
+		ReadContext: datasourceMovieRead,
 		Schema: map[string]*schema.Schema{
 			"id": {
 				Type:     schema.TypeString,
@@ -27,11 +27,11 @@ func datasourceCatalog() *schema.Resource {
 	}
 }
 
-func datasourceCatalogRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func datasourceMovieRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := &http.Client{Timeout: 10 * time.Second}
 	var diags diag.Diagnostics
 	id := d.Get("id").(string)
-	req, err := http.NewRequest("GET", fmt.Sprintf("%s/catalog/%s", "http://localhost:8080", id), nil)
+	req, err := http.NewRequest("GET", fmt.Sprintf("%s/movie/%s", "http://localhost:8080", id), nil)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -42,17 +42,17 @@ func datasourceCatalogRead(ctx context.Context, d *schema.ResourceData, m interf
 	}
 	defer r.Body.Close()
 
-	catalog := make(map[string]interface{})
-	err = json.NewDecoder(r.Body).Decode(&catalog)
+	movie := make(map[string]interface{})
+	err = json.NewDecoder(r.Body).Decode(&movie)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	if err := d.Set("name", catalog["Name"]); err != nil {
+	if err := d.Set("name", movie["Name"]); err != nil {
 		return diag.FromErr(err)
 	}
 
-	d.SetId(catalog["Id"].(string))
+	d.SetId(movie["Id"].(string))
 
 	return diags
 }

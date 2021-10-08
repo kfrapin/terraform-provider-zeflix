@@ -12,12 +12,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func ressourceCatalog() *schema.Resource {
+func ressourceMovie() *schema.Resource {
 	return &schema.Resource{
-		CreateContext: resourceCatalogCreate,
-		ReadContext:   resourceCatalogRead,
-		UpdateContext: resourceCatalogUpdate,
-		DeleteContext: resourceCatalogDelete,
+		CreateContext: resourceMovieCreate,
+		ReadContext:   resourceMovieRead,
+		UpdateContext: resourceMovieUpdate,
+		DeleteContext: resourceMovieDelete,
 		Schema: map[string]*schema.Schema{
 			"id": {
 				Type:     schema.TypeString,
@@ -31,7 +31,7 @@ func ressourceCatalog() *schema.Resource {
 	}
 }
 
-func resourceCatalogCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceMovieCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := &http.Client{Timeout: 10 * time.Second}
 
 	// get provider configuration (host, token)
@@ -42,13 +42,13 @@ func resourceCatalogCreate(ctx context.Context, d *schema.ResourceData, m interf
 	var diags diag.Diagnostics
 
 	// create json body
-	catalog := make(map[string]interface{})
-	catalog["name"] = d.Get("name").(string)
+	movie := make(map[string]interface{})
+	movie["name"] = d.Get("name").(string)
 	b := new(bytes.Buffer)
-	json.NewEncoder(b).Encode(&catalog)
+	json.NewEncoder(b).Encode(&movie)
 
-	// create catalog
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/catalog", endpoint), b)
+	// create movie
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/movie", endpoint), b)
 	req.Header.Add("X-Session-Token", token)
 	if err != nil {
 		return diag.FromErr(err)
@@ -68,12 +68,12 @@ func resourceCatalogCreate(ctx context.Context, d *schema.ResourceData, m interf
 	d.SetId(created["Id"].(string))
 
 	// populate terraform state after creation
-	resourceCatalogRead(ctx, d, m)
+	resourceMovieRead(ctx, d, m)
 
 	return diags
 }
 
-func resourceCatalogRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceMovieRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := &http.Client{Timeout: 10 * time.Second}
 	var diags diag.Diagnostics
 
@@ -82,35 +82,35 @@ func resourceCatalogRead(ctx context.Context, d *schema.ResourceData, m interfac
 	endpoint := provider["api_endpoint"]
 	token := provider["api_token"]
 
-	// use already defined id to retrieve catalog
+	// use already defined id to retrieve movie
 	id := d.Id()
-	req, err := http.NewRequest("GET", fmt.Sprintf("%s/catalog/%s", endpoint, id), nil)
+	req, err := http.NewRequest("GET", fmt.Sprintf("%s/movie/%s", endpoint, id), nil)
 	req.Header.Add("X-Session-Token", token)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	// retrieve catalog request
+	// retrieve movie request
 	r, err := client.Do(req)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 	defer r.Body.Close()
 
-	// set catalog informations into state
-	catalog := make(map[string]interface{})
-	err = json.NewDecoder(r.Body).Decode(&catalog)
+	// set movie informations into state
+	movie := make(map[string]interface{})
+	err = json.NewDecoder(r.Body).Decode(&movie)
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	if err := d.Set("name", catalog["Name"]); err != nil {
+	if err := d.Set("name", movie["Name"]); err != nil {
 		return diag.FromErr(err)
 	}
 
 	return diags
 }
 
-func resourceCatalogUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceMovieUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := &http.Client{Timeout: 10 * time.Second}
 
 	// update if name has changed
@@ -121,13 +121,13 @@ func resourceCatalogUpdate(ctx context.Context, d *schema.ResourceData, m interf
 		token := provider["api_token"]
 
 		// prepare request body
-		catalog := make(map[string]interface{})
-		catalog["name"] = d.Get("name").(string)
+		movie := make(map[string]interface{})
+		movie["name"] = d.Get("name").(string)
 		b := new(bytes.Buffer)
-		json.NewEncoder(b).Encode(&catalog)
+		json.NewEncoder(b).Encode(&movie)
 
-		// update catalog
-		req, err := http.NewRequest("PATCH", fmt.Sprintf("%s/catalog/%s", endpoint, d.Id()), b)
+		// update movie
+		req, err := http.NewRequest("PATCH", fmt.Sprintf("%s/movie/%s", endpoint, d.Id()), b)
 		req.Header.Add("X-Session-Token", token)
 		if err != nil {
 			return diag.FromErr(err)
@@ -140,10 +140,10 @@ func resourceCatalogUpdate(ctx context.Context, d *schema.ResourceData, m interf
 	}
 
 	// populate terraform state after creation
-	return resourceCatalogRead(ctx, d, m)
+	return resourceMovieRead(ctx, d, m)
 }
 
-func resourceCatalogDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceMovieDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	client := &http.Client{Timeout: 10 * time.Second}
 	var diags diag.Diagnostics
 
@@ -152,22 +152,22 @@ func resourceCatalogDelete(ctx context.Context, d *schema.ResourceData, m interf
 	endpoint := provider["api_endpoint"]
 	token := provider["api_token"]
 
-	// use already defined id to retrieve catalog
+	// use already defined id to retrieve movie
 	id := d.Id()
-	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/catalog/%s", endpoint, id), nil)
+	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/movie/%s", endpoint, id), nil)
 	req.Header.Add("X-Session-Token", token)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	// delete catalog request
+	// delete movie request
 	r, err := client.Do(req)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 	defer r.Body.Close()
 
-	// set catalog id to nil for the state
+	// set movie id to nil for the state
 	d.SetId("")
 
 	return diags
