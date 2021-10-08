@@ -11,10 +11,10 @@ func Provider() func() *schema.Provider {
 	return func() *schema.Provider {
 		p := &schema.Provider{
 			ResourcesMap: map[string]*schema.Resource{
-				"zeflix_catalog": ressourceCatalog(),
+				"zeflix_movie": ressourceMovie(),
 			},
 			DataSourcesMap: map[string]*schema.Resource{
-				"zeflix_catalog": datasourceCatalog(),
+				"zeflix_movie": datasourceMovie(),
 			},
 			// provider configuration
 			Schema: map[string]*schema.Schema{

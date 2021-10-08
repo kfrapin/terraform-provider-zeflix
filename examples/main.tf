@@ -1,7 +1,7 @@
-resource "zeflix_catalog" "top_100_catalog" {
-  name = "Top 10 Best Movies Ever"
+resource "zeflix_movie" "gladiator" {
+  name = "Gladiator"
 }
 
-output "my_catalog" {
-  value = zeflix_catalog.top_100_catalog
+output "my_movie" {
+  value = zeflix_movie.gladiator
 }
