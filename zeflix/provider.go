@@ -11,7 +11,7 @@ func Provider() func() *schema.Provider {
 				// no resources yet
 			},
 			DataSourcesMap: map[string]*schema.Resource{
-				"zeflix_catalog": datasourceCatalog(),
+				"zeflix_movie": datasourceMovie(),
 			},
 		}
 		return p

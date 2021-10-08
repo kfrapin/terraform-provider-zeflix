@@ -1,8 +1,8 @@
-data "zeflix_catalog" "my_catalog" {
+data "zeflix_movie" "my_first_movie" {
     # required parameter:
-    # id = "<catalog-id>"
+    # id = "<movie-id>"
 }
 
-output "my_catalog" {
-    value = data.zeflix_catalog.my_catalog
+output "my_movie" {
+    value = data.zeflix_movie.my_first_movie
 }
