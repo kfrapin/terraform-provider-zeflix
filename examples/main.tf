@@ -1,7 +1,7 @@
-resource "zeflix_catalog" "top_100_catalog" {
-  name = "Top 10 Best Movies Ever"
+resource "zeflix_movie" "terminator_3" {
+  name = "Terminator 3 - Le soulevement"
 }
 
-output "my_catalog" {
-  value = zeflix_catalog.top_100_catalog
+output "my_movie" {
+  value = zeflix_movie.terminator_3
 }
